@@ -45,7 +45,7 @@ void BycGLProgram::active() {
     if (!_linked || _id == 0)
         _compileAndLink();
     
-    glUseProgram(_id);
+    CHECK_GL_ERROR(glUseProgram(_id));
 }
 
 const GLuint BycGLProgram::getId() {

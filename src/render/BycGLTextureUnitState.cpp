@@ -36,7 +36,6 @@ _attachment(GL_COLOR_ATTACHMENT0) {
 } 
 
 BycGLTextureUnitState::~BycGLTextureUnitState() {
- 	
 }
 
 void BycGLTextureUnitState::setName(const String& name) {
@@ -180,26 +179,26 @@ bool BycGLTextureUnitState::load2DTexture(BycSceneManager* manager) {
     if (_tex == nullptr) {
         _tex = new BycGLTexture(file, _type);
         texCache->add(_tex);
-    }
-    
-    // Read image data.
-    BycImage* image = new BycImage();
-    bool ret = image->loadImage(file);
-    if (!ret) {
-        printf("BycGLTextureUnitState: \n%s \n path: %s\n", "Fail to load texture", file.c_str());
-        return false;
+
+        // Read image data.
+        BycImage* image = new BycImage();
+        bool ret = image->loadImage(file);
+        if (!ret) {
+            printf("BycGLTextureUnitState: \n%s \n path: %s\n", "Fail to load texture", file.c_str());
+            return false;
+        }
+
+        const unsigned char* buffer = image->getBuffer();
+        if (!buffer)
+            return false;
+
+        // Set texture content.
+        _tex->texImage(0, GL_RGBA, image->getWidth(), image->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        // Free image.
+        delete image;
     }
 
-    const unsigned char* buffer = image->getBuffer();
-    if (!buffer)
-        return false;
-    
-    // Set texture content.
-    _tex->texImage(0, GL_RGBA, image->getWidth(), image->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-    // Free image.
-    delete image;
-    
     return true;
 }
 

@@ -24,15 +24,15 @@ public:
         MIP
     };
     enum FilterOption {
-        FO_NONE,
         NEAR,
-        LINEAR
+        LINEAR,
+        FO_NONE
     };
     enum WrapOption {
-        WO_NONE,
-        REPEAT,
-        MIRROR,
-        CLAMP
+        REPEAT = GL_REPEAT,
+        MIRROR = GL_MIRRORED_REPEAT,
+        CLAMP = GL_CLAMP_TO_EDGE,
+        WO_NONE
     };
     struct UVWWrap {
         WrapOption u, v, w;

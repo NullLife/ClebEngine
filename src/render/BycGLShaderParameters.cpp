@@ -59,11 +59,11 @@ const BycGLShaderParamField::FieldDataType BycGLShaderParameters::UniformParam::
 //====================================//
 
 BycGLShaderParameters::BycGLShaderParameters() : _isBinded(false) {
-} 
+}
 
 BycGLShaderParameters::~BycGLShaderParameters() {
     _paramKV.clear();
-    
+
     _intData.clear();
     _floatData.clear();
     _doubleData.clear();
@@ -76,7 +76,7 @@ void BycGLShaderParameters::addUniformParameter(BycGLShaderParamField::FieldCont
                                                 BycGLShaderParamField::FieldDataType dataType,
                                                 int index) {
     UniformParam param(content, dataType, index);
-    
+
     auto iter = _paramKV.find(param.getName());
     if (iter != _paramKV.end()) {
 #ifdef DEBUG
@@ -85,7 +85,7 @@ void BycGLShaderParameters::addUniformParameter(BycGLShaderParamField::FieldCont
 #endif
         return;
     }
-    
+
     if (BycGLShaderParamField::isFloat(dataType)) {
         param.setCursor(_floatData.size());
         _floatData.resize(_floatData.size() + BycGLShaderParamField::getFieldComponents(dataType));
@@ -96,14 +96,14 @@ void BycGLShaderParameters::addUniformParameter(BycGLShaderParamField::FieldCont
         param.setCursor(_doubleData.size());
         _doubleData.resize(_doubleData.size() + BycGLShaderParamField::getFieldComponents(dataType));
     }
-    
+
     _paramKV.insert(UniformParamKV::value_type(param.getName(), param));
 }
 
 void BycGLShaderParameters::_bindParams(GLuint programId) {
     if (_isBinded)
         return;
-    
+
     auto iter = _paramKV.begin();
     while (iter != _paramKV.end()) {
         iter->second.setLocation(glGetUniformLocation(programId, iter->first.c_str()));
@@ -125,18 +125,18 @@ void BycGLShaderParameters::setUniformValue(const BycGLShaderParamField::FieldCo
         assert(false);
         return;
     }
-    
+
     memcpy(&_intData[cursor], data, sizeof(int) * count);
 }
 
 void BycGLShaderParameters::setUniformValue(const BycGLShaderParamField::FieldContent& content, float* data, int count) {
-    String commps = BycStringUtils::toString(count);
+    String comps = BycStringUtils::toString(count);
     if (count == 9) {
-        commps = "3x3";
+        comps = "3x3";
     } else if (count == 16) {
-        commps = "4x4";
+        comps = "4x4";
     }
-    String name = BycGLShaderParamField::toString(content) + "_" + commps + "f";
+    String name = BycGLShaderParamField::toString(content) + "_" + comps + "f";
     auto iter = _paramKV.find(name);
     if (iter == _paramKV.end()) {
         assert(false);
@@ -148,7 +148,7 @@ void BycGLShaderParameters::setUniformValue(const BycGLShaderParamField::FieldCo
         assert(false);
         return;
     }
-    
+
     memcpy(&_floatData[cursor], data, sizeof(float) * count);
 }
 void BycGLShaderParameters::setUniformValue(const BycGLShaderParamField::FieldContent& content, double* data, int count) {
@@ -164,7 +164,7 @@ void BycGLShaderParameters::setUniformValue(const BycGLShaderParamField::FieldCo
         assert(false);
         return;
     }
-    
+
     memcpy(&_doubleData[cursor], data, sizeof(double) * count);
 }
 
@@ -172,11 +172,13 @@ void BycGLShaderParameters::updateLocalParams(BycParamsDataSource* dataSource) {
     auto iter = _paramKV.begin();
     while (iter != _paramKV.end()) {
         UniformParam& param = iter->second;
-        
+
         const BycGLShaderParamField::FieldContent& content = param.getContent();
         switch (content) {
             case BycGLShaderParamField::FieldContent::MVP_MATRIX: {
+                
                 Mat4 mvp = dataSource->getProjectionMatrix() * dataSource->getViewMatrix() * dataSource->getModelMatrix();
+
                 setUniformValue(content, &mvp[0][0], 16);
             }
                 break;
@@ -193,24 +195,24 @@ void BycGLShaderParameters::_updateParamsToGPU() {
             ++iter;
             continue;
         }
-        
-        bool transpose = false;
+
+        GLboolean transpose = GL_FALSE;
         const BycGLShaderParamField::FieldDataType& dataType = param.getDataType();
         switch (dataType) {
             case BycGLShaderParamField::FLOAT1:
-                glUniform1fv(param.getLocation(), 1, getFloatPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform1fv(param.getLocation(), 1, getFloatPointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::FLOAT2:
-                glUniform2fv(param.getLocation(), 1, getFloatPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform2fv(param.getLocation(), 1, getFloatPointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::FLOAT3:
-                glUniform3fv(param.getLocation(), 1, getFloatPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform3fv(param.getLocation(), 1, getFloatPointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::FLOAT4:
-                glUniform4fv(param.getLocation(), 1, getFloatPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform4fv(param.getLocation(), 1, getFloatPointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::INT1:
-                glUniform1iv(param.getLocation(), 1, getIntPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform1iv(param.getLocation(), 1, getIntPointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::INT2:
                 break;
@@ -219,25 +221,25 @@ void BycGLShaderParameters::_updateParamsToGPU() {
             case BycGLShaderParamField::INT4:
                 break;
             case BycGLShaderParamField::DOUBLE1:
-                glUniform1dv(param.getLocation(), 1, getDoublePointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform1dv(param.getLocation(), 1, getDoublePointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::DOUBLE2:
-                glUniform2dv(param.getLocation(), 1, getDoublePointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform2dv(param.getLocation(), 1, getDoublePointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::DOUBLE3:
-                glUniform3dv(param.getLocation(), 1, getDoublePointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform3dv(param.getLocation(), 1, getDoublePointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::DOUBLE4:
-                glUniform4dv(param.getLocation(), 1, getDoublePointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniform4dv(param.getLocation(), 1, getDoublePointer(param.getCursor())));
                 break;
-                
+
             case BycGLShaderParamField::MATRIX_3X3:
-                glUniformMatrix3fv(param.getLocation(), 1, transpose, getFloatPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniformMatrix3fv(param.getLocation(), 1, transpose, getFloatPointer(param.getCursor())));
                 break;
             case BycGLShaderParamField::MATRIX_4X4:
-                glUniformMatrix4fv(param.getLocation(), 1, transpose, getFloatPointer(param.getCursor()));
+                CHECK_GL_ERROR(glUniformMatrix4fv(param.getLocation(), 1, transpose, getFloatPointer(param.getCursor())));
                 break;
-                
+
             default:
                 break;
         }

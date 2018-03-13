@@ -16,20 +16,20 @@
 #include "BycMesh.h"
 #include "BycMaterial.h"
 
-BycEntity* BycEntity::create(BycModelData* modelData) {
-    if (modelData==nullptr || modelData->getData().empty())
+BycEntity *BycEntity::create(BycModelData *modelData) {
+    if (modelData == nullptr || modelData->getData().empty())
         return nullptr;
-    
-    BycEntity* entity = new BycEntity();
-    for (BycModelData::ChildModel* cm : modelData->getData()) {
-        BycMesh* mesh = new BycMesh();
-        
+
+    BycEntity                     *entity = new BycEntity();
+    for (BycModelData::ChildModel *cm : modelData->getData()) {
+        BycMesh *mesh = new BycMesh();
+
         BycMesh::Vertices vertices;
         BycMesh::Indices  indices;
-        
+
         // Vertices.
         BycMesh::VertexDeclaration vdel;
-        
+
         if (!cm->_vertices.empty())
             vdel.addField(BycMesh::VertexPacketField::VERTEX_3F);
         if (!cm->_normals.empty())
@@ -38,9 +38,9 @@ BycEntity* BycEntity::create(BycModelData* modelData) {
             vdel.addField(BycMesh::VertexPacketField::TANGENT_3F);
         if (!cm->_texCoords.empty())
             vdel.addField(BycMesh::VertexPacketField::TEX_COORD_3F);
-    
-        size_t verticeNum = cm->_vertices.size();
-        for (int i=0; i<verticeNum; ++i) {
+
+        size_t   verticeNum = cm->_vertices.size();
+        for (int i          = 0; i < verticeNum; ++i) {
             if (vdel.getWrapping() == BycMesh::VertexPacketWrapping::CROSS) {
                 if (!cm->_vertices.empty()) {
                     vertices.push_back(cm->_vertices[i].x);
@@ -64,14 +64,14 @@ BycEntity* BycEntity::create(BycModelData* modelData) {
                 }
             }
         }
-        
+
         // Indices.
         indices.insert(indices.begin(), cm->_indices.begin(), cm->_indices.end());
-        
+
         mesh->setVertexDeclaration(vdel);
         mesh->setVertices(vertices);
         mesh->setIndices(indices);
-        
+
         entity->addMesh(mesh);
     }
     return entity;
@@ -86,53 +86,53 @@ BycEntity::~BycEntity() {
         delete _mtl;
         _mtl = nullptr;
     }
-    
+
     delete _trans;
 }
 
-void BycEntity::setName(const String& name) {
+void BycEntity::setName(const String &name) {
     _name = name;
 }
 
-const String& BycEntity::getName() const {
+const String &BycEntity::getName() const {
     return _name;
 }
 
-void BycEntity::setMaterial(BycMaterial* mtl) {
+void BycEntity::setMaterial(BycMaterial *mtl) {
     _mtl = mtl;
 }
 
-BycMaterial* BycEntity::getMaterial() {
+BycMaterial *BycEntity::getMaterial() {
     return _mtl;
 }
 
-void BycEntity::addMesh(BycMesh* mesh) {
+void BycEntity::addMesh(BycMesh *mesh) {
     addMeshAndMaterial(mesh, nullptr);
 }
 
-void BycEntity::addMeshAndMaterial(BycMesh* mesh, BycMaterial* mtl) {
-    BycSubEntity* sub = new BycSubEntity();
+void BycEntity::addMeshAndMaterial(BycMesh *mesh, BycMaterial *mtl) {
+    BycSubEntity *sub = new BycSubEntity();
     sub->setParent(this);
     sub->setMesh(mesh);
     sub->setMaterial(mtl);
     _subEntities.push_back(sub);
 }
 
-BycTransform* BycEntity::getTransform() {
+BycTransform *BycEntity::getTransform() {
     return _trans;
 }
 
-const BycEntity::SubEntityArr& BycEntity::getSubEntityArray() {
+const BycEntity::SubEntityArr &BycEntity::getSubEntityArray() {
     return _subEntities;
 }
 
 //==================== SubEntity ====================//
 BycSubEntity::BycSubEntity() :
-BycDrawable(),
-_name(""), _parent(nullptr),
-_mesh(nullptr), _mtl(nullptr),
-_vao(0), _verBuf(0), _idxBuf(0),
-_isBinded(false) {
+        BycDrawable(),
+        _name(""), _parent(nullptr),
+        _mesh(nullptr), _mtl(nullptr),
+        _vao(0), _verBuf(0), _idxBuf(0),
+        _isBinded(false) {
 }
 
 BycSubEntity::~BycSubEntity() {
@@ -146,61 +146,61 @@ BycSubEntity::~BycSubEntity() {
     }
 }
 
-void BycSubEntity::setName(const String& name) {
+void BycSubEntity::setName(const String &name) {
     _name = name;
 }
 
-const String& BycSubEntity::getName() {
+const String &BycSubEntity::getName() {
     return _name;
 }
 
-void BycSubEntity::setParent(BycEntity* parant) {
+void BycSubEntity::setParent(BycEntity *parant) {
     _parent = parant;
 }
 
-BycEntity* BycSubEntity::getParent() {
+BycEntity *BycSubEntity::getParent() {
     return _parent;
 }
 
-void BycSubEntity::setMesh(BycMesh* mesh) {
+void BycSubEntity::setMesh(BycMesh *mesh) {
     _mesh = mesh;
 }
 
-void BycSubEntity::setMaterial(BycMaterial* mtl) {
+void BycSubEntity::setMaterial(BycMaterial *mtl) {
     _mtl = mtl;
 }
 
-BycMesh* BycSubEntity::getMesh() {
+BycMesh *BycSubEntity::getMesh() {
     return _mesh;
 }
 
-BycMaterial* BycSubEntity::getMaterial() {
+BycMaterial *BycSubEntity::getMaterial() {
     return _mtl;
 }
 
-const Mat4& BycSubEntity::getModelMatrix() {
+const Mat4 &BycSubEntity::getModelMatrix() {
     return _parent->getTransform()->getMatrix();
 }
 
-void BycSubEntity::getRenderOpt(BycRenderOpt& opt) {
+void BycSubEntity::getRenderOpt(BycRenderOpt &opt) {
     assert(_vao != 0);
     opt._vao = _vao;
-    
+
     opt._start = 0;
     opt._count = _mesh->getIndices().size();
 }
 
 void BycSubEntity::commitData() {
-    if (_vao != 0 && _verBuf !=0) {
-        glBindVertexArray(_vao);
+    if (_vao != 0 && _verBuf != 0) {
+        CHECK_GL_ERROR(glBindVertexArray(_vao));
         return;
     }
-    
-    glGenVertexArrays(1, &_vao);
+
+    CHECK_GL_ERROR(glGenVertexArrays(1, &_vao));
     assert(_vao > 0);
-    
-    glBindVertexArray(_vao);
-    
+
+    CHECK_GL_ERROR(glBindVertexArray(_vao));
+
     _commitMesh();
 }
 
@@ -210,55 +210,55 @@ void BycSubEntity::bindData() {
 }
 
 void BycSubEntity::_commitMesh() {
-    // Vertice.
-    const BycMesh::Vertices& vertices = _mesh->getVertices();
+    // Vertices.
+    const BycMesh::Vertices &vertices = _mesh->getVertices();
     if (vertices.empty())
         return;
-    
-    glGenBuffers(1, &_verBuf);
+
+    CHECK_GL_ERROR(glGenBuffers(1, &_verBuf));
     assert(_verBuf != 0);
     size_t vertexSize = sizeof(float) * vertices.size();
-    glBindBuffer(GL_ARRAY_BUFFER, _verBuf);
-    glBufferData(GL_ARRAY_BUFFER, vertexSize, &vertices[0], GL_STATIC_DRAW);
-    
+    CHECK_GL_ERROR(glBindBuffer(GL_ARRAY_BUFFER, _verBuf));
+    CHECK_GL_ERROR(glBufferData(GL_ARRAY_BUFFER, vertexSize, &vertices[0], GL_STATIC_DRAW));
+
     // Indices.
-    const BycMesh::Indices& indices = _mesh->getIndices();
+    const BycMesh::Indices &indices = _mesh->getIndices();
     if (indices.empty())
         return;
-    
-    glGenBuffers(1, &_idxBuf);
+
+    CHECK_GL_ERROR(glGenBuffers(1, &_idxBuf));
     assert(_idxBuf != 0);
-    
-    size_t indicesSize = sizeof(unsigned int)*indices.size();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _idxBuf);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, &indices[0], GL_STATIC_DRAW);
+
+    size_t indicesSize = sizeof(unsigned int) * indices.size();
+    CHECK_GL_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _idxBuf));
+    CHECK_GL_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, &indices[0], GL_STATIC_DRAW));
 }
 
 void BycSubEntity::_bindMesh() {
     assert(_vao > 0);
-    glBindVertexArray(_vao);
-    const BycMesh::VertexDeclaration& decl = _mesh->getVertexDeclaration();
+    CHECK_GL_ERROR(glBindVertexArray(_vao));
+    const BycMesh::VertexDeclaration &decl = _mesh->getVertexDeclaration();
     const BycMesh::VertexPacketWrapping wrapping = decl.getWrapping();
     if (wrapping == BycMesh::VertexPacketWrapping::CROSS) {
         size_t offset = 0;
-        
-        const int fieldCount = decl.getFieldCount();
+
+        const int    fieldCount   = decl.getFieldCount();
         const size_t vertexStride = decl.getVertexStride();
-        for (int i=0; i<fieldCount; ++i) {
+        for (int     i            = 0; i < fieldCount; ++i) {
             int stride = decl.getFieldStride(decl.getField(i));
-            glVertexAttribPointer(i,
-                                  (GLsizei) BycStringUtils::getFieldCommponents(decl.getField(i)),
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  (GLsizei) vertexStride,
-                                  GL_BUFFER_OFFSET(offset));
-            
-            glEnableVertexAttribArray(i);
-            
+            CHECK_GL_ERROR(glVertexAttribPointer(i,
+                                                 (GLsizei) BycStringUtils::getFieldCommponents(decl.getField(i)),
+                                                 GL_FLOAT,
+                                                 GL_FALSE,
+                                                 (GLsizei) vertexStride,
+                                                 GL_BUFFER_OFFSET(offset)));
+
+            CHECK_GL_ERROR(glEnableVertexAttribArray(i));
+
             offset += stride;
         }
     }
-    
+
     _isBinded = true;
 }
 

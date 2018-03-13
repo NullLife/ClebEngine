@@ -24,7 +24,7 @@ public:
 
 private:
     String _name;
-    float _width, _height;
+    int _width, _height;
 
     GLuint _id;
 };

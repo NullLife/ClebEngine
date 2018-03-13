@@ -11,11 +11,18 @@
 BycGLTexture::BycGLTexture(const String &name, GLenum type) :
         _name(name),
         _type(type) {
+
     CHECK_GL_ERROR(glGenTextures(1, &_id));
+
+    printf("New texture: id(%d) name(%s)\n", _id, _name.c_str());
 }
 
 BycGLTexture::~BycGLTexture() {
-    CHECK_GL_ERROR(glDeleteTextures(1, &_id));
+    if (_id > 0) {
+        printf("Delete texture: %s\n", _name.c_str());
+
+        CHECK_GL_ERROR(glDeleteTextures(1, &_id));
+    }
 }
 
 const String &BycGLTexture::getName() const {

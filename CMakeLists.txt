@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(include_ext_assimp ./src/external/include/assimp)
 set(include_ext_gl ./src/external/include/GL)
 set(include_ext_glfw ./src/external/include/GLFW)
-set(include_ext_glm ./src/external/include/GLM)
+set(include_ext_glm ./src/external/include/glm)
 set(include_ext_soil ./src/external/include/SOIL/src)
 
 set(include_app ./src/app)

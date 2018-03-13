@@ -19,6 +19,7 @@ class BycSubEntity;
 class BycParamsDataSource;
 class BycGLTextureCache;
 class BycGLRenderSystem;
+class BycPass;
 
 class BycPointLight;
 class BycDirectionalLight;

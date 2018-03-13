@@ -108,7 +108,7 @@ void BycMultiRenderTarget::prepare() {
     GLenum status = _fbo->check();
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         _fbo->unbind();
-        printf("FrameBuffer error: %s \n [%s]", _fbo->getName().c_str(), BycStringUtils::toString((int)status));
+        printf("FrameBuffer error: %s \n [%s]", _fbo->getName().c_str(), BycStringUtils::toString((int)status).c_str());
         _isPrepared = false;
         return;
     }

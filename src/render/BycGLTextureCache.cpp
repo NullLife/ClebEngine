@@ -14,8 +14,10 @@ BycGLTextureCache::BycGLTextureCache() {
 } 
 
 BycGLTextureCache::~BycGLTextureCache() {
-    for (TexCache::value_type& val : _cache) {
-        delete val.second;
+    auto iter = _cache.begin();
+    while (iter != _cache.end()) {
+        delete iter->second;
+        ++iter;
     }
     _cache.clear();
 }

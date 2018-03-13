@@ -66,12 +66,12 @@ void BycGLRenderSystem::draw(BycRenderOpt& opt, BycPass* pass) {
         params->_bindParams(_currProgram->getId());
     }
     _currProgram->commitParamDataToGPU();
-    
+
     // set textures.
     for (BycGLTextureUnitState* state : pass->getGLTextureUnitStates()) {
         setTextureState(state);
     }
-    
+
     glDrawElements(GL_TRIANGLES, (GLsizei) opt._count, GL_UNSIGNED_INT, 0);
 }
 
@@ -83,31 +83,31 @@ void BycGLRenderSystem::setTextureState(BycGLTextureUnitState* texState) {
         // FixMe: Considering using a default texture here...?
         return;
     }
-    
+
+    BycGLTexture* tex = texState->getTexture();
     const GLenum texType = texState->getTextureType();
-//    const GLenum attachment = texState->getAttachment();
-    
-    glBindTexture(texType, texState->getTexture()->getId());
+
+    tex->bind();
     
     // Filtering.
     bool isMipmap = (texState->getFiltering(BycGLTextureUnitState::FilterType::MIP) != BycGLTextureUnitState::FilterOption::FO_NONE);
     if (isMipmap) {
         /// Mipmap...
     } else {
-        glTexParameteri(texType, GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri(texType, GL_TEXTURE_MAX_LEVEL, 0);
-        
+        CHECK_GL_ERROR(glTexParameteri(texType, GL_TEXTURE_BASE_LEVEL, 0));
+        CHECK_GL_ERROR(glTexParameteri(texType, GL_TEXTURE_MAX_LEVEL, 0));
+
         setTextureUnitFiltering(texType, BycGLTextureUnitState::FilterType::MIN, texState->getFiltering(BycGLTextureUnitState::FilterType::MIN));
         setTextureUnitFiltering(texType, BycGLTextureUnitState::FilterType::MAG, texState->getFiltering(BycGLTextureUnitState::FilterType::MAG));
     }
-    
+
     // Wrapping.
     const BycGLTextureUnitState::UVWWrap& uvw = texState->getUVWWrap();
     setTextureWrap(texType, uvw);
-    
-    // Bind texture.
-    glActiveTexture((GLenum) (GL_TEXTURE0 + texState->getUnit()));
-    glBindTexture(texType, texState->getTexture()->getId());
+
+//    // Bind texture.
+//    glActiveTexture((GLenum) (GL_TEXTURE0 + texState->getUnit()));
+//    glBindTexture(texType, texState->getTexture()->getId());
 }
 
 void BycGLRenderSystem::setTextureUnitFiltering(GLenum texType, BycGLTextureUnitState::FilterType filterType, BycGLTextureUnitState::FilterOption opt) {
@@ -147,7 +147,6 @@ void BycGLRenderSystem::setTextureWrap(GLenum texType, BycGLTextureUnitState::UV
     glTexParameterf(texType, GL_TEXTURE_WRAP_T, uvw.v);
     if (uvw.w != BycGLTextureUnitState::WrapOption::WO_NONE)
         glTexParameterf(texType, GL_TEXTURE_WRAP_R, uvw.w);
-
 }
 
 BycGLProgram* BycGLRenderSystem::getProgram(std::uint64_t key) {

@@ -54,8 +54,6 @@ void GameWindow::running() {
         
         // Poll for and process events
         glfwPollEvents();
-        
-//        glfwSwapInterval(1);
     }
 }
 
@@ -92,7 +90,8 @@ void GameWindow::initWindow() {
     glfwWindowHint(GLFW_RESIZABLE, false);
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
-    glfwSwapInterval(1);
+
+//    glfwSwapInterval(1);
     
     // Create window.
     _window = glfwCreateWindow(_width, _height, _name.c_str(), NULL, NULL);
@@ -117,7 +116,7 @@ void GameWindow::initWindow() {
     setEventCallbacks();
     
     // Share window's pointer.
-     glfwSetWindowUserPointer(_window, (void *) this);
+    glfwSetWindowUserPointer(_window, (void *) this);
     
     // Get version info.
     const GLubyte *renderer = glGetString(GL_RENDERER);
@@ -128,7 +127,7 @@ void GameWindow::initWindow() {
     int frameWidth, frameHeight;
     glfwGetFramebufferSize(_window, &frameWidth, &frameHeight);
     glViewport(0, 0, frameWidth, frameHeight);
-    printf("Framebuffer: [%d, %d]\n", frameWidth, frameHeight);
+    printf("FrameBuffer: [%d, %d]\n", frameWidth, frameHeight);
     printf("%s\n\n", "======================");
 }
 
@@ -138,8 +137,8 @@ void GameWindow::setEventCallbacks() {
 }
 
 void GameWindow::drawScene() {
-    glClearBufferfv(GL_COLOR, 0, &_clearColor[0]);
-    glClearBufferfv(GL_DEPTH, 0, &_clearDepth);
+    CHECK_GL_ERROR(glClearBufferfv(GL_COLOR, 0, &_clearColor[0]));
+    CHECK_GL_ERROR(glClearBufferfv(GL_DEPTH, 0, &_clearDepth));
     
     if (_sceneManager == nullptr)
         return;
